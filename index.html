@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>DANE</title>
+ <!--  <link rel="stylesheet" href="index.css"> -->
+</head>
+<body>
+  <link rel="stylesheet" href="./index.css">
+	<h1 class="title">Formulario DANE</h1>
+	<form class="form" onsubmit="guardar(event)">
+		<label for="identificacion">Número de Identificación:</label>
+		<input class="formInput" type="text" id="identificacion" name="identificacion"><br><br>
+
+		<label for="nombres">Nombre:</label>
+		<input class="formInput" type="text" id="nombres" name="nombres"><br><br>
+
+		<label for="apellidos">Apellido:</label>
+		<input class="formInput" type="text" id="apellidos" name="apellidos"><br><br>
+
+		<label for="direccion">Dirección:</label>
+		<input class="formInput" type="text" id="direccion" name="direccion"><br><br>
+
+		<label for="estrato">Estrato:</label>
+		<input class="formInput" type="number" id="estrato" name="estrato"><br><br>
+
+		<label for="celular">Celular:</label>
+		<input class="formInput" type="tel" id="celular" name="celular"><br><br>
+
+		<label for="email">Correo electrónico:</label>
+		<input class="formInput" type="email" id="email" name="email"><br><br>
+
+		<input type="submit" value="Guardar">
+		<input type="reset" value="Crear nuevo registro" onclick="() => location.reload()">
+    <input type="reset" value="Ver Registros" onclick="verRegistros()">
+    <input type="reset" value="Sincronizar" onclick="sincronizar()">
+	</form>
+
+  <script src="node_modules/pouchdb/dist/pouchdb.min.js"></script>
+	<script>
+    const db = new PouchDB('dane');
+
+		async function verRegistros() {
+			const data = await db.allDocs({ include_docs: true });
+      data.rows.map((dat) => console.log(dat.doc))
+		}
+
+		function sincronizar() {
+			// Código para sincronizar los datos con una base de datos o servidor
+      const remoteDB = new PouchDB('http://admin:1234@127.0.0.1:5984/dane');
+      db.sync(remoteDB, {
+        live: true,
+        retry: true,
+      }).on('change', function (info) {
+        console.log('sync complete');
+      }).on('error', function (err) {
+        console.log('sync error');
+      });
+		}
+
+    function guardar(event) {
+      event.preventDefault();
+
+      const identificacion = document.getElementById("identificacion").value;
+      const nombres = document.getElementById("nombres").value;
+      const apellidos = document.getElementById("apellidos").value;
+      const direccion = document.getElementById("direccion").value;
+      const estrato = document.getElementById("estrato").value;
+      const celular = document.getElementById("celular").value;
+      const email = document.getElementById("email").value;
+
+      const data = {
+        identificacion,
+        nombres,
+        apellidos,
+        direccion,
+        estrato,
+        celular,
+        email
+      }
+
+      const response = db.post(data)
+    }
+	</script>
+</body>
+</html>
